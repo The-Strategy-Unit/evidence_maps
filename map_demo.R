@@ -5,37 +5,37 @@ library(DT)
 
 
 
-covid_data <- read_excel("example_long_cvd.xlsx",
+covid_data <- readxl::read_excel("example_long_cvd.xlsx",
   sheet = "Understanding the condition"
 ) |>
-  mutate(
-    id = row_number(),
+  dplyr::mutate(
+    id = dplyr::row_number(),
     Link = paste0("<a href='", Link, "' target = 'new'>", "Link", "</a>")
   )
 
 
 
 summary_data <- covid_data |>
-  select(Theme, `Evidence Group`) |>
-  group_by(Theme, `Evidence Group`) |>
-  summarise(count = n()) |>
-  pivot_wider(names_from = `Evidence Group`, values_from = count) |>
-  ungroup() |>
-  mutate(id = row_number())
+  dplyr::select(Theme, `Evidence Group`) |>
+  dplyr::group_by(Theme, `Evidence Group`) |>
+  dplyr::summarise(count = n()) |>
+  tidyr::pivot_wider(names_from = `Evidence Group`, values_from = count) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(id = row_number())
 
-ui <- fluidPage(
+ui <- shiny::fluidPage(
   tags$style(
     "text/css",
     ".modal-dialog { width: fit-content !important; }"
   ),
-  titlePanel("Evidence Map Demo"),
-  mainPanel(
-    DTOutput("summary")
+  shiny::titlePanel("Evidence Map Demo"),
+  shiny::mainPanel(
+    DT::DTOutput("summary")
   )
 )
 
 server <- function(input, output) {
-  output$summary <- renderDT(summary_data |> select(-id),
+  output$summary <- DT::renderDT(summary_data |> select(-id),
     options = list(
       dom = "t",
       ordering = F
@@ -47,8 +47,8 @@ server <- function(input, output) {
     rownames = F
   )
 
-  observeEvent(input$summary_cells_selected, {
-    index <- req(input$summary_cells_selected)
+  shiny::observeEvent(input$summary_cells_selected, {
+    index <- shiny::req(input$summary_cells_selected)
 
     row <- index[[1]]
     col <- index[[2]] + 1
@@ -57,20 +57,20 @@ server <- function(input, output) {
     col_name <- names(summary_data[col])
 
     modal_table <- summary_data |>
-      filter(Theme == row_name) |>
-      select(1, col_name)
+      dplyr::filter(Theme == row_name) |>
+      dplyr::select(1, col_name)
 
     modal_table_tmp <- covid_data |>
-      filter(
+      dplyr::filter(
         Theme == modal_table$Theme,
         `Evidence Group` == col_name
       ) |>
-      select(Author, Title, Year, Link)
+      dplyr::select(Author, Title, Year, Link)
 
-    showModal(modalDialog(
+    shiny::showModal(shiny::modalDialog(
       title = "Testing",
       "You selected:",
-      renderDT(modal_table,
+      DT::renderDT(modal_table,
         options = list(
           dom = "t",
           ordering = F
@@ -79,7 +79,7 @@ server <- function(input, output) {
       ),
       tags$br(),
       "Results:",
-      renderDT(modal_table_tmp,
+      DT::renderDT(modal_table_tmp,
         options = list(
           dom = "t",
           ordering = F
@@ -95,4 +95,4 @@ server <- function(input, output) {
   })
 }
 
-shinyApp(ui = ui, server = server)
+shiny::shinyApp(ui = ui, server = server)
