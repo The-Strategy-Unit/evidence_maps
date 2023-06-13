@@ -5,12 +5,13 @@
 #' @import shiny
 #' @noRd
 app_ui <- function(request) {
-  tagList(
+  shiny::tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
-      h1("evidence_maps")
+    shiny::fluidPage(
+      shiny::h1("evidence_maps_test"),
+      mod_summary_table_ui("summary_table_1")
     )
   )
 }
