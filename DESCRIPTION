@@ -1,13 +1,18 @@
 Package: evidence_maps
-Title: PKG_TITLE
+Title: Evidence Maps
 Version: 0.0.0.9000
-Authors@R: person('AUTHOR_FIRST', 'AUTHOR_LAST', email = 'AUTHOR@MAIL.COM', role = c('cre', 'aut'))
+Authors@R: 
+    person("Ozayr", "Mohammed", , "ozayr.mohammed@nhs.net", role = c("cre", "aut"))
 Description: PKG_DESC.
 License: MIT + file LICENSE
 Imports: 
     config (>= 0.3.1),
+    dplyr,
+    DT,
     golem (>= 0.4.0),
-    shiny (>= 1.7.4)
+    readxl,
+    shiny (>= 1.7.4),
+    tidyr
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
