@@ -23,9 +23,9 @@ mod_summary_table_ui <- function(id) {
     shiny::titlePanel("Evidence Map Demo"),
     shiny::mainPanel(
       shiny::fluidRow(
-        shiny::selectInput(ns('yearSelect'), label = 'Select Year', choices = c('All Years', unique(covid_data$Year))),
-        #shiny::checkboxInput(ns('allYears'), label = 'Return all Years')
-        ),
+        shiny::selectInput(ns("yearSelect"), label = "Select Year", choices = c("All Years", unique(covid_data$Year))),
+        # shiny::checkboxInput(ns('allYears'), label = 'Return all Years')
+      ),
       DT::DTOutput(ns("summary")),
       shiny::verbatimTextOutput(ns("debug"))
     )
@@ -38,37 +38,38 @@ mod_summary_table_ui <- function(id) {
 mod_summary_table_server <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     selectedYear <- reactive(input$yearSelect)
 
     output$debug <- shiny::renderPrint(selectedYear())
 
-    summary_data <- reactive({req(selectedYear())
+    summary_data <- reactive({
+      req(selectedYear())
       covid_data |>
-      dplyr::filter(Year == shiny::req(selectedYear()) | req(selectedYear()) == 'All Years') |> 
-      dplyr::select(Theme, `Evidence Group`) |>
-      dplyr::group_by(Theme, `Evidence Group`) |>
-      dplyr::summarise(count = dplyr::n()) |>
-      tidyr::pivot_wider(names_from = `Evidence Group`, values_from = count) |>
-      dplyr::ungroup() |>
-      dplyr::mutate(id = dplyr::row_number())
-      })
-    
-    
-    output$summary <- DT::renderDT(summary_data() |> 
-                                     dplyr::select(-id),
-                                   options = list(
-                                     
-                                     dom = "t",
-                                     ordering = F
-                                     ),
-                                   selection = list(
-                                     mode = "single",
-                                     target = "cell"
-                                     ),
-                                   rownames = F
-                                   )
-    
+        dplyr::filter(Year == shiny::req(selectedYear()) | req(selectedYear()) == "All Years") |>
+        dplyr::select(Theme, `Evidence Group`) |>
+        dplyr::group_by(Theme, `Evidence Group`) |>
+        dplyr::summarise(count = dplyr::n()) |>
+        tidyr::pivot_wider(names_from = `Evidence Group`, values_from = count) |>
+        dplyr::ungroup() |>
+        dplyr::mutate(id = dplyr::row_number())
+    })
+
+
+    output$summary <- DT::renderDT(
+      summary_data() |>
+        dplyr::select(-id),
+      options = list(
+        dom = "t",
+        ordering = F
+      ),
+      selection = list(
+        mode = "single",
+        target = "cell"
+      ),
+      rownames = F
+    )
+
 
     shiny::observeEvent(input$summary_cells_selected, {
       index <- shiny::req(input$summary_cells_selected)

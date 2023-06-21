@@ -91,7 +91,6 @@ server <- function(input, output) {
       easyClose = T,
       fade = T
     ))
-
   })
 }
 
