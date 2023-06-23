@@ -44,9 +44,9 @@ mod_summary_table_server <- function(id) {
     output$debug <- shiny::renderPrint(selectedYear())
 
     summary_data <- reactive({
-      req(selectedYear())
+      shiny::req(selectedYear())
       covid_data |>
-        dplyr::filter(Year == shiny::req(selectedYear()) | req(selectedYear()) == "All Years") |>
+        dplyr::filter(Year == selectedYear() | selectedYear() == "All Years") |>
         dplyr::select(Theme, `Evidence Group`) |>
         dplyr::group_by(Theme, `Evidence Group`) |>
         dplyr::summarise(count = dplyr::n()) |>
