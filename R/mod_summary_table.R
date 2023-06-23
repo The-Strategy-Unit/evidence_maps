@@ -17,22 +17,15 @@ covid_data <- readxl::read_excel("inst/app/data/example_long_cvd.xlsx",
   )
 
 
-
-summary_data <- covid_data |>
-  dplyr::select(Theme, `Evidence Group`) |>
-  dplyr::group_by(Theme, `Evidence Group`) |>
-  dplyr::summarise(count = dplyr::n()) |>
-  tidyr::pivot_wider(names_from = `Evidence Group`, values_from = count) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(id = dplyr::row_number())
-
-
-
 mod_summary_table_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::titlePanel("Evidence Map Demo"),
     shiny::mainPanel(
+      shiny::fluidRow(
+        shiny::selectInput(ns("yearSelect"), label = "Select Year", choices = c("All Years", unique(covid_data$Year))),
+        # shiny::checkboxInput(ns('allYears'), label = 'Return all Years')
+      ),
       DT::DTOutput(ns("summary")),
       shiny::verbatimTextOutput(ns("debug"))
     )
@@ -46,9 +39,26 @@ mod_summary_table_server <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$debug <- shiny::renderPrint("Hello World")
+    selectedYear <- reactive(input$yearSelect)
 
-    output$summary <- DT::renderDT(summary_data |> dplyr::select(-id),
+    output$debug <- shiny::renderPrint(selectedYear())
+
+    summary_data <- reactive({
+      shiny::req(selectedYear())
+      covid_data |>
+        dplyr::filter(Year == selectedYear() | selectedYear() == "All Years") |>
+        dplyr::select(Theme, `Evidence Group`) |>
+        dplyr::group_by(Theme, `Evidence Group`) |>
+        dplyr::summarise(count = dplyr::n()) |>
+        tidyr::pivot_wider(names_from = `Evidence Group`, values_from = count) |>
+        dplyr::ungroup() |>
+        dplyr::mutate(id = dplyr::row_number())
+    })
+
+
+    output$summary <- DT::renderDT(
+      summary_data() |>
+        dplyr::select(-id),
       options = list(
         dom = "t",
         ordering = F
@@ -60,16 +70,17 @@ mod_summary_table_server <- function(id) {
       rownames = F
     )
 
+
     shiny::observeEvent(input$summary_cells_selected, {
       index <- shiny::req(input$summary_cells_selected)
 
       row <- index[[1]]
       col <- index[[2]] + 1
 
-      row_name <- summary_data$Theme[row]
-      col_name <- names(summary_data[col])
+      row_name <- summary_data()$Theme[row]
+      col_name <- names(summary_data()[col])
 
-      modal_table <- summary_data |>
+      modal_table <- summary_data() |>
         dplyr::filter(Theme == row_name) |>
         dplyr::select(1, col_name)
 
