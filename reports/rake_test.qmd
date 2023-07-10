@@ -1,0 +1,73 @@
+---
+title: "RAKE test"
+format: html
+editor: visual
+---
+
+```{r}
+#| warning: false
+library(udpipe)
+library(textrank)
+library(tidyverse)
+```
+
+# **Post-covid syndrome in individuals admitted to hospital with covid-19: retrospective cohort study**
+
+BMJ 2021; 372 doi: <https://doi.org/10.1136/bmj.n693> (Published 31 March 2021)Cite this as: BMJ 2021;372:n693
+
+## Abstract
+
+**Objective** To quantify rates of organ specific dysfunction in individuals with covid-19 after discharge from hospital compared with a matched control group from the general population.
+
+**Design** Retrospective cohort study.
+
+**Setting** NHS hospitals in England.
+
+**Participants** 47 780 individuals (mean age 65, 55% men) in hospital with covid-19 and discharged alive by 31 August 2020, exactly matched to controls from a pool of about 50 million people in England for personal and clinical characteristics from 10 years of electronic health records.
+
+**Main outcome measures** Rates of hospital readmission (or any admission for controls), all cause mortality, and diagnoses of respiratory, cardiovascular, metabolic, kidney, and liver diseases until 30 September 2020. Variations in rate ratios by age, sex, and ethnicity.
+
+**Results** Over a mean follow-up of 140 days, nearly a third of individuals who were discharged from hospital after acute covid-19 were readmitted (14 060 of 47 780) and more than 1 in 10 (5875) died after discharge, with these events occurring at rates four and eight times greater, respectively, than in the matched control group. Rates of respiratory disease (P\<0.001), diabetes (P\<0.001), and cardiovascular disease (P\<0.001) were also significantly raised in patients with covid-19, with 770 (95% confidence interval 758 to 783), 127 (122 to 132), and 126 (121 to 131) diagnoses per 1000 person years, respectively. Rate ratios were greater for individuals aged less than 70 than for those aged 70 or older, and in ethnic minority groups compared with the white population, with the largest differences seen for respiratory disease (10.5 (95% confidence interval 9.7 to 11.4) for age less than 70 years *v* 4.6 (4.3 to 4.8) for age ≥70, and 11.4 (9.8 to 13.3) for non-white *v* 5.2 (5.0 to 5.5) for white individuals).
+
+**Conclusions** Individuals discharged from hospital after covid-19 had increased rates of multiorgan dysfunction compared with the expected risk in the general population. The increase in risk was not confined to the elderly and was not uniform across ethnicities. The diagnosis, treatment, and prevention of post-covid syndrome requires integrated rather than organ or disease specific approaches, and urgent research is needed to establish the risk factors.
+
+```{r}
+
+text <- 'Abstract
+Objective To quantify rates of organ specific dysfunction in individuals with covid-19 after discharge from hospital compared with a matched control group from the general population.
+
+Design Retrospective cohort study.
+
+Setting NHS hospitals in England.
+
+Participants 47 780 individuals (mean age 65, 55% men) in hospital with covid-19 and discharged alive by 31 August 2020, exactly matched to controls from a pool of about 50 million people in England for personal and clinical characteristics from 10 years of electronic health records.
+
+Main outcome measures Rates of hospital readmission (or any admission for controls), all cause mortality, and diagnoses of respiratory, cardiovascular, metabolic, kidney, and liver diseases until 30 September 2020. Variations in rate ratios by age, sex, and ethnicity.
+
+Results Over a mean follow-up of 140 days, nearly a third of individuals who were discharged from hospital after acute covid-19 were readmitted (14 060 of 47 780) and more than 1 in 10 (5875) died after discharge, with these events occurring at rates four and eight times greater, respectively, than in the matched control group. Rates of respiratory disease (P<0.001), diabetes (P<0.001), and cardiovascular disease (P<0.001) were also significantly raised in patients with covid-19, with 770 (95% confidence interval 758 to 783), 127 (122 to 132), and 126 (121 to 131) diagnoses per 1000 person years, respectively. Rate ratios were greater for individuals aged less than 70 than for those aged 70 or older, and in ethnic minority groups compared with the white population, with the largest differences seen for respiratory disease (10.5 (95% confidence interval 9.7 to 11.4) for age less than 70 years v 4.6 (4.3 to 4.8) for age ≥70, and 11.4 (9.8 to 13.3) for non-white v 5.2 (5.0 to 5.5) for white individuals).
+
+Conclusions Individuals discharged from hospital after covid-19 had increased rates of multiorgan dysfunction compared with the expected risk in the general population. The increase in risk was not confined to the elderly and was not uniform across ethnicities. The diagnosis, treatment, and prevention of post-covid syndrome requires integrated rather than organ or disease specific approaches, and urgent research is needed to establish the risk factors.'
+```
+
+```{r}
+#ud_model <- udpipe_download_model(language = 'english-gum')
+ud_model <- udpipe_load_model("english-gum-ud-2.5-191206.udpipe")
+```
+
+head(x)
+
+```{r}
+x <- udpipe_annotate(ud_model, text)
+x <- tibble::as_tibble(x)
+head(x)
+```
+
+```{r}
+rake_test <- keywords_rake(x, 
+                      term = "token", group = c("doc_id", "paragraph_id", "sentence_id"),
+                      relevant = x$upos
+                      %in% c("NOUN", "ADJ")
+                      ,
+                      ngram_max = 4)
+rake_test |> arrange(desc(rake))
+```
