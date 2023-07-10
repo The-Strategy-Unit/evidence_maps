@@ -49,12 +49,14 @@ Results Over a mean follow-up of 140 days, nearly a third of individuals who wer
 Conclusions Individuals discharged from hospital after covid-19 had increased rates of multiorgan dysfunction compared with the expected risk in the general population. The increase in risk was not confined to the elderly and was not uniform across ethnicities. The diagnosis, treatment, and prevention of post-covid syndrome requires integrated rather than organ or disease specific approaches, and urgent research is needed to establish the risk factors.'
 ```
 
+Load model
+
 ```{r}
 #ud_model <- udpipe_download_model(language = 'english-gum')
 ud_model <- udpipe_load_model("english-gum-ud-2.5-191206.udpipe")
 ```
 
-head(x)
+Split string into words and sentences
 
 ```{r}
 x <- udpipe_annotate(ud_model, text)
