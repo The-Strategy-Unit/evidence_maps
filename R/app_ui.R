@@ -5,15 +5,62 @@
 #' @import shiny
 #' @noRd
 app_ui <- function(request) {
+  
+  header <- bs4Dash::dashboardHeader(title = 'Evidence Maps')
+  
+  sidebar <- bs4Dash::dashboardSidebar(
+    fixed = TRUE,
+    skin = "light",
+    status = "primary",
+    bs4Dash::sidebarMenu(
+      id = "sidebarMenu",
+      bs4Dash::menuItem(
+        "Home",
+        tabName = "tab_home",
+        icon = shiny::icon("house")
+        ),
+      
+      bs4Dash::menuItem(
+        "Summary Table",
+        tabName = "tab_summary"),
+      
+      bs4Dash::menuItem(
+        "Evidence Search",
+        tabName = "tab_search"
+      )
+  )
+  )
+  
+  body <- bs4Dash::dashboardBody(
+    bs4Dash::tabItems(
+      bs4Dash::tabItem(
+        tabName = "tab_home",
+        mod_home_ui("home")
+        ),
+      bs4Dash::tabItem(
+        tabName = "tab_summary",
+        mod_summary_table_ui("summary_table")
+        ),
+      bs4Dash::tabItem(
+        tabName = "tab_search",
+        mod_search_ui("search")
+      )
+    )
+  )
+  
+  
   shiny::tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    shiny::fluidPage(
-      shiny::h1("evidence_maps_test"),
-      mod_summary_table_ui("summary_table_1")
+    shinyjs::useShinyjs(),
+    bs4Dash::dashboardPage(
+      header,
+      sidebar,
+      body
+    ) 
     )
-  )
+  
 }
 
 
