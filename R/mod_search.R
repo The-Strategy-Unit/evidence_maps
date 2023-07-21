@@ -12,7 +12,10 @@
 covid_data_search <- readxl::read_excel("inst/app/data/example_long_cvd.xlsx",
                                  sheet = "Understanding the condition"
                                  ) |>
-  dplyr::select(Author, Title, Year, Link) |> 
+  dplyr::select(Author, Title, Year, Link) |>
+  dplyr::group_by(Author, Title, Year, Link) |> 
+  dplyr::summarise(tmp = dplyr::n()) |> 
+  dplyr::select(-tmp) |> 
   dplyr::mutate(
     id = dplyr::row_number(),
     Link = paste0("<a href='", Link, "' target = 'new'>", "Link", "</a>"))

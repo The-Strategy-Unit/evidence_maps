@@ -19,17 +19,18 @@ covid_data <- readxl::read_excel("inst/app/data/example_long_cvd.xlsx",
 
 mod_summary_table_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
+  shiny::fluidPage(
     shiny::titlePanel("Evidence Map Demo"),
     shiny::mainPanel(
-      shiny::fluidRow(
-        shiny::selectInput(ns("yearSelect"), label = "Select Year", choices = c("All Years", unique(covid_data$Year))),
-        # shiny::checkboxInput(ns('allYears'), label = 'Return all Years')
-      ),
+      #shiny::fluidRow(
+      shiny::selectInput(ns("yearSelect"), label = "Select Year", choices = c("All Years", unique(covid_data$Year))),
+      # shiny::checkboxInput(ns('allYears'), label = 'Return all Years')
+      #),
       DT::DTOutput(ns("summary")),
-      shiny::verbatimTextOutput(ns("debug"))
+    shiny::verbatimTextOutput(ns("debug"))
+      
     )
-  )
+    )
 }
 
 #' summary_table Server Functions
@@ -54,6 +55,21 @@ mod_summary_table_server <- function(id) {
         dplyr::ungroup() |>
         dplyr::mutate(id = dplyr::row_number())
     })
+    
+    output$waffle <- shiny::renderPlot(
+      summary_data |> #()
+        tidyr::pivot_longer(-Theme, 
+                     names_to = 'Evidence Type', 
+                     values_to = 'Count') |>
+        dplyr::filter(Theme == 'Causes') |> 
+        ggplot2::ggplot(ggplot2::aes(fill = `Evidence Type`, values = Count))+
+        waffle::geom_waffle(na.rm = T, 
+                            color = 'white',
+                            n_rows = 6)#+
+        #ggplot2::facet_wrap(~`Theme`)
+        
+        
+    )
 
 
     output$summary <- DT::renderDT(

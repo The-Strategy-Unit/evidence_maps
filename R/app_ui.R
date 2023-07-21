@@ -21,6 +21,10 @@ app_ui <- function(request) {
         ),
       
       bs4Dash::menuItem(
+        "Waffle Charts",
+        tabName = "tab_waffle"),
+      
+      bs4Dash::menuItem(
         "Summary Table",
         tabName = "tab_summary"),
       
@@ -37,6 +41,10 @@ app_ui <- function(request) {
         tabName = "tab_home",
         mod_home_ui("home")
         ),
+      bs4Dash::tabItem(
+        tabName = "tab_waffle",
+        mod_waffle_ui("waffle")
+      ),
       bs4Dash::tabItem(
         tabName = "tab_summary",
         mod_summary_table_ui("summary_table")
