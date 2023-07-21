@@ -13,7 +13,7 @@ covid_data <- readxl::read_excel("inst/app/data/example_long_cvd.xlsx",
 ) |>
   dplyr::mutate(
     id = dplyr::row_number(),
-    Link = paste0("<a href='", Link, "' target = 'new'>", "Link", "</a>")
+    Link = paste0("<a href='", Link, "' target = '_blank'>", "Link", "</a>")
   )
 
 
