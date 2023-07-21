@@ -5,11 +5,37 @@ editor: visual
 ---
 
 ```{r}
-#| warning: false
+#| include: false
 library(udpipe)
 library(textrank)
 library(tidyverse)
 ```
+
+```{r}
+#| include: false
+#ud_model <- udpipe_download_model(language = 'english-gum')
+ud_model <- udpipe_load_model("english-gum-ud-2.5-191206.udpipe")
+```
+
+```{r}
+#| include: false
+text1 <- 'Abstract
+Objective To quantify rates of organ specific dysfunction in individuals with covid-19 after discharge from hospital compared with a matched control group from the general population.
+
+Design Retrospective cohort study.
+
+Setting NHS hospitals in England.
+
+Participants 47 780 individuals (mean age 65, 55% men) in hospital with covid-19 and discharged alive by 31 August 2020, exactly matched to controls from a pool of about 50 million people in England for personal and clinical characteristics from 10 years of electronic health records.
+
+Main outcome measures Rates of hospital readmission (or any admission for controls), all cause mortality, and diagnoses of respiratory, cardiovascular, metabolic, kidney, and liver diseases until 30 September 2020. Variations in rate ratios by age, sex, and ethnicity.
+
+Results Over a mean follow-up of 140 days, nearly a third of individuals who were discharged from hospital after acute covid-19 were readmitted (14 060 of 47 780) and more than 1 in 10 (5875) died after discharge, with these events occurring at rates four and eight times greater, respectively, than in the matched control group. Rates of respiratory disease (P<0.001), diabetes (P<0.001), and cardiovascular disease (P<0.001) were also significantly raised in patients with covid-19, with 770 (95% confidence interval 758 to 783), 127 (122 to 132), and 126 (121 to 131) diagnoses per 1000 person years, respectively. Rate ratios were greater for individuals aged less than 70 than for those aged 70 or older, and in ethnic minority groups compared with the white population, with the largest differences seen for respiratory disease (10.5 (95% confidence interval 9.7 to 11.4) for age less than 70 years v 4.6 (4.3 to 4.8) for age ≥70, and 11.4 (9.8 to 13.3) for non-white v 5.2 (5.0 to 5.5) for white individuals).
+
+Conclusions Individuals discharged from hospital after covid-19 had increased rates of multiorgan dysfunction compared with the expected risk in the general population. The increase in risk was not confined to the elderly and was not uniform across ethnicities. The diagnosis, treatment, and prevention of post-covid syndrome requires integrated rather than organ or disease specific approaches, and urgent research is needed to establish the risk factors.'
+```
+
+# [*Abstract 1*]{.underline}
 
 # **Post-covid syndrome in individuals admitted to hospital with covid-19: retrospective cohort study**
 
@@ -32,44 +58,242 @@ BMJ 2021; 372 doi: <https://doi.org/10.1136/bmj.n693> (Published 31 March 2021)C
 **Conclusions** Individuals discharged from hospital after covid-19 had increased rates of multiorgan dysfunction compared with the expected risk in the general population. The increase in risk was not confined to the elderly and was not uniform across ethnicities. The diagnosis, treatment, and prevention of post-covid syndrome requires integrated rather than organ or disease specific approaches, and urgent research is needed to establish the risk factors.
 
 ```{r}
-
-text <- 'Abstract
-Objective To quantify rates of organ specific dysfunction in individuals with covid-19 after discharge from hospital compared with a matched control group from the general population.
-
-Design Retrospective cohort study.
-
-Setting NHS hospitals in England.
-
-Participants 47 780 individuals (mean age 65, 55% men) in hospital with covid-19 and discharged alive by 31 August 2020, exactly matched to controls from a pool of about 50 million people in England for personal and clinical characteristics from 10 years of electronic health records.
-
-Main outcome measures Rates of hospital readmission (or any admission for controls), all cause mortality, and diagnoses of respiratory, cardiovascular, metabolic, kidney, and liver diseases until 30 September 2020. Variations in rate ratios by age, sex, and ethnicity.
-
-Results Over a mean follow-up of 140 days, nearly a third of individuals who were discharged from hospital after acute covid-19 were readmitted (14 060 of 47 780) and more than 1 in 10 (5875) died after discharge, with these events occurring at rates four and eight times greater, respectively, than in the matched control group. Rates of respiratory disease (P<0.001), diabetes (P<0.001), and cardiovascular disease (P<0.001) were also significantly raised in patients with covid-19, with 770 (95% confidence interval 758 to 783), 127 (122 to 132), and 126 (121 to 131) diagnoses per 1000 person years, respectively. Rate ratios were greater for individuals aged less than 70 than for those aged 70 or older, and in ethnic minority groups compared with the white population, with the largest differences seen for respiratory disease (10.5 (95% confidence interval 9.7 to 11.4) for age less than 70 years v 4.6 (4.3 to 4.8) for age ≥70, and 11.4 (9.8 to 13.3) for non-white v 5.2 (5.0 to 5.5) for white individuals).
-
-Conclusions Individuals discharged from hospital after covid-19 had increased rates of multiorgan dysfunction compared with the expected risk in the general population. The increase in risk was not confined to the elderly and was not uniform across ethnicities. The diagnosis, treatment, and prevention of post-covid syndrome requires integrated rather than organ or disease specific approaches, and urgent research is needed to establish the risk factors.'
-```
-
-Load model
-
-```{r}
-#ud_model <- udpipe_download_model(language = 'english-gum')
-ud_model <- udpipe_load_model("english-gum-ud-2.5-191206.udpipe")
-```
-
-Split string into words and sentences
-
-```{r}
-x <- udpipe_annotate(ud_model, text)
+#| include: false
+x <- udpipe_annotate(ud_model, text1)
 x <- tibble::as_tibble(x)
-head(x)
+#head(x)
 ```
 
+## Keywords:
+
 ```{r}
+#| echo: false
 rake_test <- keywords_rake(x, 
                       term = "token", group = c("doc_id", "paragraph_id", "sentence_id"),
                       relevant = x$upos
                       %in% c("NOUN", "ADJ")
                       ,
                       ngram_max = 4)
-rake_test |> arrange(desc(rake))
+rake_test |> arrange(desc(rake)) |> filter(rake >1) |> select(keyword, rake)
+```
+
+# [***Abstract 2***]{.underline}
+
+# **Autonomic dysfunction in \'long COVID\': rationale, physiology and management strategies**
+
+Melanie Dani, Andreas Dirksen, Patricia Taraborrelli, Miriam Torocastro, Dimitrios Panagopoulos, Richard Sutton and Phang Boon Lim
+
+[ DOWNLOAD PDF](https://www.rcpjournals.org/content/clinmedicine/21/1/e63.full.pdf?download=true)
+
+DOI: https://doi.org/10.7861/clinmed.2020-0896
+
+Clin Med January 2021
+
+-   [ARTICLE](https://www.rcpjournals.org/content/clinmedicine/21/1/e63)
+
+-   [FIGURES & DATA](https://www.rcpjournals.org/content/clinmedicine/21/1/e63/tab-figures-data)
+
+-   [INFO & METRICS](https://www.rcpjournals.org/content/clinmedicine/21/1/e63/tab-article-info)
+
+## **ABSTRACT**
+
+The SARS-CoV-2 (COVID-19) pandemic has caused unprecedented morbidity, mortality and global disruption. Following the initial surge of infections, focus shifted to managing the longer-term sequelae of illness in survivors. \'Post-acute COVID\' (known colloquially as \'long COVID\') is emerging as a prevalent syndrome. It encompasses a plethora of debilitating symptoms (including breathlessness, chest pain, palpitations and orthostatic intolerance) which can last for weeks or more following mild illness. We describe a series of individuals with symptoms of \'long COVID\', and we posit that this condition may be related to a virus- or immune-mediated disruption of the autonomic nervous system resulting in orthostatic intolerance syndromes. We suggest that all physicians should be equipped to recognise such cases, appreciate the symptom burden and provide supportive management. We present our rationale for an underlying impaired autonomic physiology post-COVID-19 and suggest means of management.
+
+```{r}
+#| include: false
+text2 <- 'ABSTRACT
+The SARS-CoV-2 (COVID-19) pandemic has caused unprecedented morbidity, mortality and global disruption. Following the initial surge of infections, focus shifted to managing the longer-term sequelae of illness in survivors. ‘Post-acute COVID’ (known colloquially as ‘long COVID’) is emerging as a prevalent syndrome. It encompasses a plethora of debilitating symptoms (including breathlessness, chest pain, palpitations and orthostatic intolerance) which can last for weeks or more following mild illness. We describe a series of individuals with symptoms of ‘long COVID’, and we posit that this condition may be related to a virus- or immune-mediated disruption of the autonomic nervous system resulting in orthostatic intolerance syndromes. We suggest that all physicians should be equipped to recognise such cases, appreciate the symptom burden and provide supportive management. We present our rationale for an underlying impaired autonomic physiology post-COVID-19 and suggest means of management.'
+```
+
+```{r}
+#| include: false
+x <- udpipe_annotate(ud_model, text2)
+x <- tibble::as_tibble(x)
+#head(x)
+```
+
+## Keywords:
+
+```{r}
+#| echo: false
+rake_test <- keywords_rake(x, 
+                      term = "token", group = c("doc_id", "paragraph_id", "sentence_id"),
+                      relevant = x$upos
+                      %in% c("NOUN", "ADJ")
+                      ,
+                      ngram_max = 4)
+rake_test |> arrange(desc(rake)) |> filter(rake >1) |> select(keyword, rake)
+```
+
+# [***Abstract 3***]{.underline}
+
+**Multiorgan impairment in low-risk individuals with post-COVID-19 syndrome: a prospective, community-based study**
+
+1.  **Andrea Dennis[1](https://bmjopen.bmj.com/content/11/3/e048391#aff-1),**
+
+2.  **Malgorzata Wamil[2](https://bmjopen.bmj.com/content/11/3/e048391#aff-2)**,[3](https://bmjopen.bmj.com/content/11/3/e048391#aff-3),
+
+3.  **Johann Alberts[4](https://bmjopen.bmj.com/content/11/3/e048391#aff-4),**
+
+4.  **Jude Oben[5](https://bmjopen.bmj.com/content/11/3/e048391#aff-5)**,[6](https://bmjopen.bmj.com/content/11/3/e048391#aff-6),
+
+5.  **Daniel J Cuthbertson[7](https://bmjopen.bmj.com/content/11/3/e048391#aff-7),**
+
+6.  **Dan Wootton[8](https://bmjopen.bmj.com/content/11/3/e048391#aff-8)**,[9](https://bmjopen.bmj.com/content/11/3/e048391#aff-9),
+
+7.  **Michael Crooks[10](https://bmjopen.bmj.com/content/11/3/e048391#aff-10)**,[11](https://bmjopen.bmj.com/content/11/3/e048391#aff-11),
+
+8.  **Mark Gabbay[12](https://bmjopen.bmj.com/content/11/3/e048391#aff-12),**
+
+9.  **Michael Brady[1](https://bmjopen.bmj.com/content/11/3/e048391#aff-1)**,[13](https://bmjopen.bmj.com/content/11/3/e048391#aff-13),
+
+10. **Lyth Hishmeh[14](https://bmjopen.bmj.com/content/11/3/e048391#aff-14),**
+
+11. **Emily Attree[15](https://bmjopen.bmj.com/content/11/3/e048391#aff-15),**
+
+12. **Melissa Heightman[16](https://bmjopen.bmj.com/content/11/3/e048391#aff-16),**
+
+13. **Rajarshi Banerjee[1](https://bmjopen.bmj.com/content/11/3/e048391#aff-1),**
+
+14. [**http://orcid.org/0000-0001-8741-3411**](http://orcid.org/0000-0001-8741-3411)**Amitava Banerjee[16](https://bmjopen.bmj.com/content/11/3/e048391#aff-16)**,[17](https://bmjopen.bmj.com/content/11/3/e048391#aff-17),[18](https://bmjopen.bmj.com/content/11/3/e048391#aff-18)
+
+15. **On behalf of COVERSCAN study investigators**
+
+```{=html}
+<!-- -->
+```
+1.  Correspondence to Dr Amitava Banerjee; [ami.banerjee\@ucl.ac.uk](mailto:ami.banerjee@ucl.ac.uk)
+
+## **Abstract**
+
+**Objective** To assess medium-term organ impairment in symptomatic individuals following recovery from acute SARS-CoV-2 infection.
+
+**Design** Baseline findings from a prospective, observational cohort study.
+
+**Setting** Community-based individuals from two UK centres between 1 April and 14 September 2020.
+
+**Participants** Individuals ≥18 years with persistent symptoms following recovery from acute SARS-CoV-2 infection and age-matched healthy controls.
+
+**Intervention** Assessment of symptoms by standardised questionnaires (EQ-5D-5L, Dyspnoea-12) and organ-specific metrics by biochemical assessment and quantitative MRI.
+
+**Main outcome measures** Severe post-COVID-19 syndrome defined as ongoing respiratory symptoms and/or moderate functional impairment in activities of daily living; single-organ and multiorgan impairment (heart, lungs, kidneys, liver, pancreas, spleen) by consensus definitions at baseline investigation.
+
+**Results** 201 individuals (mean age 45, range 21--71 years, 71% female, 88% white, 32% healthcare workers) completed the baseline assessment (median of 141 days following SARS-CoV-2 infection, IQR 110--162). The study population was at low risk of COVID-19 mortality (obesity 20%, hypertension 7%, type 2 diabetes 2%, heart disease 5%), with only 19% hospitalised with COVID-19. 42% of individuals had 10 or more symptoms and 60% had severe post-COVID-19 syndrome. Fatigue (98%), muscle aches (87%), breathlessness (88%) and headaches (83%) were most frequently reported. Mild organ impairment was present in the heart (26%), lungs (11%), kidneys (4%), liver (28%), pancreas (40%) and spleen (4%), with single-organ and multiorgan impairment in 70% and 29%, respectively. Hospitalisation was associated with older age (p=0.001), non-white ethnicity (p=0.016), increased liver volume (p\<0.0001), pancreatic inflammation (p\<0.01), and fat accumulation in the liver (p\<0.05) and pancreas (p\<0.01). Severe post-COVID-19 syndrome was associated with radiological evidence of cardiac damage (myocarditis) (p\<0.05).
+
+**Conclusions** In individuals at low risk of COVID-19 mortality with ongoing symptoms, 70% have impairment in one or more organs 4 months after initial COVID-19 symptoms, with implications for healthcare and public health, which have assumed low risk in young people with no comorbidities.
+
+```{r}
+#| include: false
+text3 <- 'Abstract
+
+Objective To assess medium-term organ impairment in symptomatic individuals following recovery from acute SARS-CoV-2 infection.
+
+Design Baseline findings from a prospective, observational cohort study.
+
+Setting Community-based individuals from two UK centres between 1 April and 14 September 2020.
+
+Participants Individuals ≥18 years with persistent symptoms following recovery from acute SARS-CoV-2 infection and age-matched healthy controls.
+
+Intervention Assessment of symptoms by standardised questionnaires (EQ-5D-5L, Dyspnoea-12) and organ-specific metrics by biochemical assessment and quantitative MRI.
+
+Main outcome measures Severe post-COVID-19 syndrome defined as ongoing respiratory symptoms and/or moderate functional impairment in activities of daily living; single-organ and multiorgan impairment (heart, lungs, kidneys, liver, pancreas, spleen) by consensus definitions at baseline investigation.
+
+Results 201 individuals (mean age 45, range 21–71 years, 71% female, 88% white, 32% healthcare workers) completed the baseline assessment (median of 141 days following SARS-CoV-2 infection, IQR 110–162). The study population was at low risk of COVID-19 mortality (obesity 20%, hypertension 7%, type 2 diabetes 2%, heart disease 5%), with only 19% hospitalised with COVID-19. 42% of individuals had 10 or more symptoms and 60% had severe post-COVID-19 syndrome. Fatigue (98%), muscle aches (87%), breathlessness (88%) and headaches (83%) were most frequently reported. Mild organ impairment was present in the heart (26%), lungs (11%), kidneys (4%), liver (28%), pancreas (40%) and spleen (4%), with single-organ and multiorgan impairment in 70% and 29%, respectively. Hospitalisation was associated with older age (p=0.001), non-white ethnicity (p=0.016), increased liver volume (p<0.0001), pancreatic inflammation (p<0.01), and fat accumulation in the liver (p<0.05) and pancreas (p<0.01). Severe post-COVID-19 syndrome was associated with radiological evidence of cardiac damage (myocarditis) (p<0.05).
+
+Conclusions In individuals at low risk of COVID-19 mortality with ongoing symptoms, 70% have impairment in one or more organs 4 months after initial COVID-19 symptoms, with implications for healthcare and public health, which have assumed low risk in young people with no comorbidities.'
+```
+
+```{r}
+#| include: false
+x <- udpipe_annotate(ud_model, text3)
+x <- tibble::as_tibble(x)
+#head(x)
+```
+
+## Keywords:
+
+```{r}
+#| echo: false
+rake_test <- keywords_rake(x, 
+                      term = "token", group = c("doc_id", "paragraph_id", "sentence_id"),
+                      relevant = x$upos
+                      %in% c("NOUN", "ADJ")
+                      ,
+                      ngram_max = 4)
+rake_test |> arrange(desc(rake)) |> filter(rake >1) |> select(keyword, rake)
+```
+
+# [***Abstract 4***]{.underline}
+
+# Delayed bystander CD8 T cell activation, early immune pathology and persistent dysregulation characterise severe COVID-19
+
+Laura Bergamaschi, Federica Mescia, Lorinda Turner, Aimee Hanson, Prasanti Kotagiri, Benjamin J. Dunmore, [ View ORCID Profile](http://orcid.org/0000-0002-7113-2540)Hélène Ruffieux, Aloka De Sa, Oisín Huhn, Michael D Morgan, Pehuen Pereyra Gerber, Mark R. Wills, Stephen Baker, Fernando J Calero-Nieto, Rainer Doffinger, Gordon Dougan, Anne Elmer, Ian G Goodfellow, [ View ORCID Profile](http://orcid.org/0000-0001-9751-1808)Ravindra K. Gupta, Myra Hosmillo, Kelvin Hunter, Nathalie Kingston, Paul J. Lehner, Nicholas J. Matheson, Jeremy K. Nicholson, Anna M. Petrunkina, Sylvia Richardson, Caroline Saunders, James E.D. Thaventhiran, [ View ORCID Profile](http://orcid.org/0000-0001-9039-635X)Erik J. M. Toonen, Michael P. Weekes, Cambridge Institute of Therapeutic Immunology and Infectious Disease-National Institute of Health Research (CITIID-NIHR) COVID BioResource Collaboration, Berthold Göttgens, Mark Toshner, Christoph Hess, John R. Bradley, Paul A. Lyons, Kenneth G.C. Smith
+
+**doi:** https://doi.org/10.1101/2021.01.11.20248765
+
+Now published in *Immunity* doi: [10.1016/j.immuni.2021.05.010](https://doi.org/10.1016/j.immuni.2021.05.010)
+
+100024049
+
+-   [**Abstract**](https://www.medrxiv.org/content/10.1101/2021.01.11.20248765v2)
+
+-   [Full Text](https://www.medrxiv.org/content/10.1101/2021.01.11.20248765v2.full-text)
+
+-   [Info/History](https://www.medrxiv.org/content/10.1101/2021.01.11.20248765v2.article-info)
+
+-   [Metrics](https://www.medrxiv.org/content/10.1101/2021.01.11.20248765v2.article-metrics)
+
+-   
+
+-   
+
+-   [ Preview PDF](https://www.medrxiv.org/content/10.1101/2021.01.11.20248765v2.full.pdf+html)
+
+## **Summary**
+
+In a study of 207 SARS-CoV2-infected individuals with a range of severities followed over 12 weeks from symptom onset, we demonstrate that an early robust bystander CD8 T cell immune response, without systemic inflammation, is characteristic of asymptomatic or mild disease. Those presenting to hospital had delayed bystander responses and systemic inflammation already evident at around symptom onset. Such early evidence of inflammation suggests immunopathology may be inevitable in some individuals, or that preventative intervention might be needed before symptom onset. Viral load does not correlate with the development of this pathological response, but does with its subsequent severity. Immune recovery is complex, with profound persistent cellular abnormalities correlating with a change in the nature of the inflammatory response, where signatures characteristic of increased oxidative phosphorylation and reactive-oxygen species-associated inflammation replace those driven by TNF and IL-6. These late immunometabolic inflammatory changes and unresolved immune defects may have clinical implications.
+
+```{r}
+#| include: false
+text4 <- 'Summary
+In a study of 207 SARS-CoV2-infected individuals with a range of severities followed over 12 weeks from symptom onset, we demonstrate that an early robust bystander CD8 T cell immune response, without systemic inflammation, is characteristic of asymptomatic or mild disease. Those presenting to hospital had delayed bystander responses and systemic inflammation already evident at around symptom onset. Such early evidence of inflammation suggests immunopathology may be inevitable in some individuals, or that preventative intervention might be needed before symptom onset. Viral load does not correlate with the development of this pathological response, but does with its subsequent severity. Immune recovery is complex, with profound persistent cellular abnormalities correlating with a change in the nature of the inflammatory response, where signatures characteristic of increased oxidative phosphorylation and reactive-oxygen species-associated inflammation replace those driven by TNF and IL-6. These late immunometabolic inflammatory changes and unresolved immune defects may have clinical implications.'
+```
+
+```{r}
+#| include: false
+x <- udpipe_annotate(ud_model, text4)
+x <- tibble::as_tibble(x)
+#head(x)
+```
+
+## Keywords:
+
+```{r}
+#| echo: false
+rake_test <- keywords_rake(x, 
+                      term = "token", group = c("doc_id", "paragraph_id", "sentence_id"),
+                      relevant = x$upos
+                      %in% c("NOUN", "ADJ")
+                      ,
+                      ngram_max = 4)
+rake_test |> arrange(desc(rake)) |> filter(rake >1) |> select(keyword, rake)
+```
+
+# Keyword extraction for above 4 abstracts combined
+
+```{r}
+#| echo: false
+all_text <- paste(text1, text2, text3, text4)
+
+x <- udpipe_annotate(ud_model, all_text)
+x <- tibble::as_tibble(x)
+
+rake_test <- keywords_rake(x, 
+                      term = "token", group = c("doc_id", "paragraph_id", "sentence_id"),
+                      relevant = x$upos
+                      %in% c("NOUN", "ADJ")
+                      ,
+                      ngram_max = 4)
+rake_test |> arrange(desc(rake)) |> filter(rake >1) |> select(keyword, rake)
+
 ```
