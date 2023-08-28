@@ -36,9 +36,9 @@ mod_search_ui <- function(id){
   
   
   shiny::tagList(
-    shiny::numericInput('dist', 
-                        label = 'Search string distance',
-                        value = 1),
+    #shiny::numericInput('dist', 
+     #                   label = 'Search string distance',
+      #                  value = 1),
     shinyWidgets::searchInput(ns("search"),
                               label = "Search Evidence",
                               placeholder = "Search..",
@@ -57,9 +57,9 @@ mod_search_server <- function(id){
     
     dist_val <- reactive(1)
     
-    observe({input$dist
-      dist_val <- input$dist
-      })
+    # observe({input$dist
+    #   dist_val <- input$dist
+    #   })
     
     observe({input$search_search
       
