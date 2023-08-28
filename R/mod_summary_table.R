@@ -21,15 +21,17 @@ mod_summary_table_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::fluidPage(
     shiny::titlePanel("Evidence Map Demo"),
-    shiny::mainPanel(
-      #shiny::fluidRow(
-      shiny::selectInput(ns("yearSelect"), label = "Select Year", choices = c("All Years", unique(covid_data$Year))),
-      # shiny::checkboxInput(ns('allYears'), label = 'Return all Years')
-      #),
-      DT::DTOutput(ns("summary")),
-    shiny::verbatimTextOutput(ns("debug"))
+    #shiny::mainPanel(
+      shiny::selectInput(ns("yearSelect"), 
+                         label = "Select Year", 
+                         choices = c("All Years", unique(covid_data$Year))),
+      shiny::fluidRow(
+        column(width = 8, DT::DTOutput(ns("summary"))),
+        column(width = 4, shiny::plotOutput(ns("waffle")))
+      ),
       
-    )
+    shiny::verbatimTextOutput(ns("debug"))
+    #)
     )
 }
 
@@ -56,20 +58,30 @@ mod_summary_table_server <- function(id) {
         dplyr::mutate(id = dplyr::row_number())
     })
     
-    output$waffle <- shiny::renderPlot(
-      summary_data |> #()
-        tidyr::pivot_longer(-Theme, 
-                     names_to = 'Evidence Type', 
-                     values_to = 'Count') |>
-        dplyr::filter(Theme == 'Causes') |> 
-        ggplot2::ggplot(ggplot2::aes(fill = `Evidence Type`, values = Count))+
-        waffle::geom_waffle(na.rm = T, 
-                            color = 'white',
-                            n_rows = 6)#+
-        #ggplot2::facet_wrap(~`Theme`)
+    
+    waffle_data <- reactive({
+      shiny::req(selectedYear())
+      covid_data |>
+        dplyr::filter(Year == selectedYear() | selectedYear() == "All Years") |>
+        dplyr::select(Theme, `Evidence Group`)
+    })
+    
+    #output$waffle <- shiny::renderPlot(
+      
+      
+      # summary_data |> #()
+      #   tidyr::pivot_longer(-Theme, 
+      #                names_to = 'Evidence Type', 
+      #                values_to = 'Count') |>
+      #   dplyr::filter(Theme == 'Causes') |> 
+      #   ggplot2::ggplot(ggplot2::aes(fill = `Evidence Type`, values = Count))+
+      #   waffle::geom_waffle(na.rm = T, 
+      #                       color = 'white',
+      #                       n_rows = 6)#+
+      #   ggplot2::facet_wrap(~`Theme`)
         
         
-    )
+    #)
 
 
     output$summary <- DT::renderDT(
@@ -131,6 +143,34 @@ mod_summary_table_server <- function(id) {
         easyClose = T,
         fade = T
       ))
+      
+      
+      
+      filtered_waffle_data <- waffle_data() |> 
+        dplyr::filter(Theme == row_name) |>
+        ggwaffle::waffle_iron(
+          ggwaffle::aes_d(group = 'Evidence Group')) |> 
+        dplyr::mutate(selected = ifelse(group == col_name, T, F))
+      
+      output$waffle <- shiny::renderPlot({
+        
+        filtered_waffle_data |> 
+          ggplot2::ggplot(ggplot2::aes(x, y, fill = group))+
+          ggwaffle::geom_waffle()+
+          ggwaffle::geom_waffle(data = filtered_waffle_data |> 
+                                  dplyr::filter(selected == T),
+                                colour = 'blue',
+                                show.legend = F)+
+          ggplot2::coord_equal()+
+          viridis::scale_fill_viridis(discrete = T)+
+          ggwaffle::theme_waffle()+
+          ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                         axis.title.y = ggplot2::element_blank(),
+                         legend.position = 'top',
+                         legend.title = ggplot2::element_blank())+
+          ggplot2::guides(fill = ggplot2::guide_legend(nrow=2, byrow=T))
+      })
+      
     })
   })
 }
