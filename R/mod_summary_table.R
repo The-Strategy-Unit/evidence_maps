@@ -103,21 +103,17 @@ mod_summary_table_server <- function(id) {
       row <- index[[1]]
       col <- index[[2]] + 1
 
-      row_name <- summary_data()$Theme[row]
-      col_name <- names(summary_data()[col])
+      row_selected <- summary_data()$Theme[row]
+      col_selected <- names(summary_data()[col])
 
-      modal_table <- summary_data() |>
-        dplyr::filter(Theme == row_name) |>
-        dplyr::select(1, col_name)
-
-      modal_table_tmp <- covid_data |>
+      summary_selected <- covid_data |>
         dplyr::filter(
-          Theme == modal_table$Theme,
-          `Evidence Group` == col_name
+          Theme == row_selected,
+          `Evidence Group` == col_selected
         ) |>
         dplyr::select(Author, Title, Year, Link)
 
-      output$selectedTable <- DT::renderDT(modal_table_tmp,
+      output$selectedTable <- DT::renderDT(summary_selected,
                                            options = list(
                                              dom = "t",
                                              ordering = F
@@ -130,10 +126,10 @@ mod_summary_table_server <- function(id) {
       output$waffle <- shiny::renderPlot({
         
         filtered_waffle_data <- waffle_data()|>
-          dplyr::filter(Theme == row_name) |> 
+          dplyr::filter(Theme == row_selected) |> 
           ggwaffle::waffle_iron(
             ggwaffle::aes_d(group = 'Evidence Group')) |> 
-          dplyr::mutate(selected = ifelse(group == col_name, T, F))
+          dplyr::mutate(selected = ifelse(group == col_selected, T, F))
         
         shiny::req(filtered_waffle_data)
         filtered_waffle_data |> 
