@@ -15,16 +15,6 @@ app_ui <- function(request) {
     bs4Dash::sidebarMenu(
       id = "sidebarMenu",
       bs4Dash::menuItem(
-        "Home",
-        tabName = "tab_home",
-        icon = shiny::icon("house")
-        ),
-      
-      bs4Dash::menuItem(
-        "Waffle Charts",
-        tabName = "tab_waffle"),
-      
-      bs4Dash::menuItem(
         "Summary Table",
         tabName = "tab_summary"),
       
@@ -37,14 +27,6 @@ app_ui <- function(request) {
   
   body <- bs4Dash::dashboardBody(
     bs4Dash::tabItems(
-      bs4Dash::tabItem(
-        tabName = "tab_home",
-        mod_home_ui("home")
-        ),
-      bs4Dash::tabItem(
-        tabName = "tab_waffle",
-        mod_waffle_ui("waffle")
-      ),
       bs4Dash::tabItem(
         tabName = "tab_summary",
         mod_summary_table_ui("summary_table")

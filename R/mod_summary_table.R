@@ -20,11 +20,9 @@ covid_data <- readxl::read_excel("inst/app/data/example_long_cvd.xlsx",
 mod_summary_table_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::fluidPage(
-    shiny::titlePanel("Evidence Map Demo"),
-    #shiny::mainPanel(
-      shiny::selectInput(ns("yearSelect"), 
-                         label = "Select Year", 
-                         choices = c("All Years", unique(covid_data$Year))),
+    shiny::selectInput(ns("yearSelect"), 
+                       label = "Select Year", 
+                       choices = c("All Years", unique(covid_data$Year))),
       shiny::fluidRow(
         column(width = 8, DT::DTOutput(ns("summary"))),
         column(width = 4, shiny::plotOutput(ns("waffle")))

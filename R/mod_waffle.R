@@ -9,8 +9,7 @@
 #' @importFrom shiny NS tagList 
 
 waffle_data <- readxl::read_excel("inst/app/data/example_long_cvd.xlsx",
-                                 sheet = "Understanding the condition"
-) |>
+                                 sheet = "Understanding the condition") |>
   dplyr::filter(!Theme == 'Prognosis')
   # dplyr::group_by(`Evidence Group`, Theme) |> 
   # dplyr::summarise(count = dplyr::n())
@@ -49,11 +48,12 @@ mod_waffle_server <- function(id){
       dplyr::filter(Theme == theme) |>
       ggwaffle::waffle_iron(
         ggwaffle::aes_d(group = 'Evidence Group')) |> 
-       ggplot2::ggplot(ggplot2::aes(x, y, fill = group))+
+       ggplot2::ggplot(ggplot2::aes(x, y, fill = group), colour = 'red')+
          ggwaffle::geom_waffle()+
       ggplot2::coord_equal()+
       viridis::scale_fill_viridis(discrete = T)+
-      ggwaffle::theme_waffle()+
+      
+      #ggwaffle::theme_waffle()+
       ggplot2::ggtitle(stringr::str_wrap(theme, 20))
       
    output[[glue::glue('waffle{id}')]] <- shiny::renderPlot(waffle)
