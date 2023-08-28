@@ -27,8 +27,8 @@ mod_summary_table_ui <- function(id) {
         column(width = 8, DT::DTOutput(ns("summary"))),
         column(width = 4, shiny::plotOutput(ns("waffle")))
       ),
-      
-    shiny::verbatimTextOutput(ns("debug"))
+    shiny::verbatimTextOutput(ns("debug")),
+    DT::DTOutput(ns("selectedTable"))
     #)
     )
 }
@@ -117,41 +117,25 @@ mod_summary_table_server <- function(id) {
         ) |>
         dplyr::select(Author, Title, Year, Link)
 
-      shiny::showModal(shiny::modalDialog(
-        title = "Testing",
-        "You selected:",
-        DT::renderDT(modal_table,
-          options = list(
-            dom = "t",
-            ordering = F
-          ),
-          rownames = F
-        ),
-        tags$br(),
-        "Results:",
-        DT::renderDT(modal_table_tmp,
-          options = list(
-            dom = "t",
-            ordering = F
-          ),
-          escape = F,
-          rownames = F,
-          selection = "none"
-        ),
-        easyClose = T,
-        fade = T
-      ))
-      
-      
-      
-      filtered_waffle_data <- waffle_data() |> 
-        dplyr::filter(Theme == row_name) |>
-        ggwaffle::waffle_iron(
-          ggwaffle::aes_d(group = 'Evidence Group')) |> 
-        dplyr::mutate(selected = ifelse(group == col_name, T, F))
+      output$selectedTable <- DT::renderDT(modal_table_tmp,
+                                           options = list(
+                                             dom = "t",
+                                             ordering = F
+                                             ),
+                                           rownames = F,
+                                           escape = F,
+                                           selection = "none"
+                                           )
       
       output$waffle <- shiny::renderPlot({
         
+        filtered_waffle_data <- waffle_data()|>
+          dplyr::filter(Theme == row_name) |> 
+          ggwaffle::waffle_iron(
+            ggwaffle::aes_d(group = 'Evidence Group')) |> 
+          dplyr::mutate(selected = ifelse(group == col_name, T, F))
+        
+        shiny::req(filtered_waffle_data)
         filtered_waffle_data |> 
           ggplot2::ggplot(ggplot2::aes(x, y, fill = group))+
           ggwaffle::geom_waffle()+
