@@ -19,17 +19,18 @@ covid_data <- readxl::read_excel("inst/app/data/example_long_cvd.xlsx",
 
 mod_summary_table_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::titlePanel("Evidence Map Demo"),
-    shiny::mainPanel(
+  shiny::fluidPage(
+    shiny::selectInput(ns("yearSelect"), 
+                       label = "Select Year", 
+                       choices = c("All Years", unique(covid_data$Year))),
       shiny::fluidRow(
-        shiny::selectInput(ns("yearSelect"), label = "Select Year", choices = c("All Years", unique(covid_data$Year))),
-        # shiny::checkboxInput(ns('allYears'), label = 'Return all Years')
+        column(width = 8, DT::DTOutput(ns("summary"))),
+        column(width = 4, shiny::plotOutput(ns("waffle")))
       ),
-      DT::DTOutput(ns("summary")),
-      shiny::verbatimTextOutput(ns("debug"))
+    shiny::verbatimTextOutput(ns("debug")),
+    DT::DTOutput(ns("selectedTable"))
+    #)
     )
-  )
 }
 
 #' summary_table Server Functions
@@ -54,6 +55,31 @@ mod_summary_table_server <- function(id) {
         dplyr::ungroup() |>
         dplyr::mutate(id = dplyr::row_number())
     })
+    
+    
+    waffle_data <- reactive({
+      shiny::req(selectedYear())
+      covid_data |>
+        dplyr::filter(Year == selectedYear() | selectedYear() == "All Years") |>
+        dplyr::select(Theme, `Evidence Group`)
+    })
+    
+    #output$waffle <- shiny::renderPlot(
+      
+      
+      # summary_data |> #()
+      #   tidyr::pivot_longer(-Theme, 
+      #                names_to = 'Evidence Type', 
+      #                values_to = 'Count') |>
+      #   dplyr::filter(Theme == 'Causes') |> 
+      #   ggplot2::ggplot(ggplot2::aes(fill = `Evidence Type`, values = Count))+
+      #   waffle::geom_waffle(na.rm = T, 
+      #                       color = 'white',
+      #                       n_rows = 6)#+
+      #   ggplot2::facet_wrap(~`Theme`)
+        
+        
+    #)
 
 
     output$summary <- DT::renderDT(
@@ -77,44 +103,52 @@ mod_summary_table_server <- function(id) {
       row <- index[[1]]
       col <- index[[2]] + 1
 
-      row_name <- summary_data()$Theme[row]
-      col_name <- names(summary_data()[col])
+      row_selected <- summary_data()$Theme[row]
+      col_selected <- names(summary_data()[col])
 
-      modal_table <- summary_data() |>
-        dplyr::filter(Theme == row_name) |>
-        dplyr::select(1, col_name)
-
-      modal_table_tmp <- covid_data |>
+      summary_selected <- covid_data |>
         dplyr::filter(
-          Theme == modal_table$Theme,
-          `Evidence Group` == col_name
+          Theme == row_selected,
+          `Evidence Group` == col_selected
         ) |>
         dplyr::select(Author, Title, Year, Link)
 
-      shiny::showModal(shiny::modalDialog(
-        title = "Testing",
-        "You selected:",
-        DT::renderDT(modal_table,
-          options = list(
-            dom = "t",
-            ordering = F
-          ),
-          rownames = F
-        ),
-        tags$br(),
-        "Results:",
-        DT::renderDT(modal_table_tmp,
-          options = list(
-            dom = "t",
-            ordering = F
-          ),
-          escape = F,
-          rownames = F,
-          selection = "none"
-        ),
-        easyClose = T,
-        fade = T
-      ))
+      output$selectedTable <- DT::renderDT(summary_selected,
+                                           options = list(
+                                             dom = "t",
+                                             ordering = F
+                                             ),
+                                           rownames = F,
+                                           escape = F,
+                                           selection = "none"
+                                           )
+      
+      output$waffle <- shiny::renderPlot({
+        
+        filtered_waffle_data <- waffle_data()|>
+          dplyr::filter(Theme == row_selected) |> 
+          ggwaffle::waffle_iron(
+            ggwaffle::aes_d(group = 'Evidence Group')) |> 
+          dplyr::mutate(selected = ifelse(group == col_selected, T, F))
+        
+        shiny::req(filtered_waffle_data)
+        filtered_waffle_data |> 
+          ggplot2::ggplot(ggplot2::aes(x, y, fill = group))+
+          ggwaffle::geom_waffle()+
+          ggwaffle::geom_waffle(data = filtered_waffle_data |> 
+                                  dplyr::filter(selected == T),
+                                colour = 'blue',
+                                show.legend = F)+
+          ggplot2::coord_equal()+
+          viridis::scale_fill_viridis(discrete = T)+
+          ggwaffle::theme_waffle()+
+          ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                         axis.title.y = ggplot2::element_blank(),
+                         legend.position = 'top',
+                         legend.title = ggplot2::element_blank())+
+          ggplot2::guides(fill = ggplot2::guide_legend(nrow=2, byrow=T))
+      })
+      
     })
   })
 }
